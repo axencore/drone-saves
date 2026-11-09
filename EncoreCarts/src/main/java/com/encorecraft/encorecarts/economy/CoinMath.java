@@ -1,85 +1,58 @@
 package com.encorecraft.encorecarts.economy;
 
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Optional;
-
-/** Pure wallet arithmetic: paying a copper price from a multi-denomination purse with change. */
+/**
+ * Pure arithmetic on a wallet stored as one copper total, matching EncoreCraftNew 2.x
+ * ({@code CurrencyAmounts}): saturating credit, debit clamped at zero, per-coin "digits" for display and
+ * for {@code setCoinPlayer}.
+ */
 public final class CoinMath {
     private static final Coin[] ASCENDING = Coin.values();
 
     private CoinMath() {
     }
 
-    /**
-     * Pays {@code cost} copper. Lower denominations are spent first; when they run out, the smallest
-     * sufficient higher coins are broken and the change is returned as lower denominations.
-     *
-     * @return the purse after payment, or empty if the purse is worth less than {@code cost}
-     */
-    public static Optional<CoinPurse> pay(CoinPurse purse, long cost) {
-        if (cost < 0) {
-            throw new IllegalArgumentException("Negative cost " + cost);
-        }
-        if (purse.totalCopper() < cost) {
-            return Optional.empty();
-        }
-        long[] amounts = new long[ASCENDING.length];
-        for (int i = 0; i < ASCENDING.length; i++) {
-            amounts[i] = purse.get(ASCENDING[i]);
-        }
-        long remaining = cost;
-        for (int i = 0; i < ASCENDING.length && remaining > 0; i++) {
-            long value = ASCENDING[i].copperValue();
-            long needed = ceilDiv(remaining, value);
-            if (amounts[i] >= needed) {
-                amounts[i] -= needed;
-                long change = needed * value - remaining;
-                remaining = 0;
-                distributeChange(amounts, i, change);
-            } else {
-                remaining -= amounts[i] * value;
-                amounts[i] = 0;
-            }
-        }
-        if (remaining > 0) {
-            return Optional.empty();
-        }
-        return Optional.of(new CoinPurse(amounts[0], amounts[1], amounts[2], amounts[3]));
-    }
-
-    /** Smallest number of coins worth exactly {@code copper}, used for refunds. */
+    /** Smallest number of coins worth exactly {@code copper}; platinum takes everything above 99 gold. */
     public static CoinPurse fromCopper(long copper) {
         if (copper < 0) {
             throw new IllegalArgumentException("Negative amount " + copper);
         }
         long[] amounts = new long[ASCENDING.length];
-        distributeChange(amounts, ASCENDING.length, copper);
+        long rest = copper;
+        for (int j = ASCENDING.length - 1; j >= 0; j--) {
+            long value = ASCENDING[j].copperValue();
+            amounts[j] = rest / value;
+            rest %= value;
+        }
         return new CoinPurse(amounts[0], amounts[1], amounts[2], amounts[3]);
     }
 
-    /** Per-coin difference {@code after - before}; zero entries are omitted. */
-    public static Map<Coin, Long> delta(CoinPurse before, CoinPurse after) {
-        Map<Coin, Long> result = new EnumMap<>(Coin.class);
-        for (Coin coin : ASCENDING) {
-            long diff = after.get(coin) - before.get(coin);
-            if (diff != 0) {
-                result.put(coin, diff);
-            }
+    /** {@code amount} coins of {@code coin} in copper, rounded like EncoreCraft; non-positive or NaN → 0. */
+    public static long toCopper(double amount, Coin coin) {
+        if (!Double.isFinite(amount) || amount <= 0) {
+            return 0;
         }
-        return result;
+        double copper = amount * coin.copperValue();
+        return copper >= 9.223372036854776E18 ? Long.MAX_VALUE : Math.max(0L, Math.round(copper));
     }
 
-    /** Adds {@code change} copper to the denominations strictly below index {@code above}, largest first. */
-    private static void distributeChange(long[] amounts, int above, long change) {
-        for (int j = above - 1; j >= 0 && change > 0; j--) {
-            long value = ASCENDING[j].copperValue();
-            amounts[j] += change / value;
-            change %= value;
-        }
+    public static long add(long wallet, long copper) {
+        long w = Math.max(0, wallet);
+        long c = Math.max(0, copper);
+        return Long.MAX_VALUE - w < c ? Long.MAX_VALUE : w + c;
     }
 
-    private static long ceilDiv(long a, long b) {
-        return -Math.floorDiv(-a, b);
+    /** Debit that never goes below zero (EncoreCraft's {@code delCoinPlayer} behaviour). */
+    public static long subtractClamped(long wallet, long copper) {
+        return Math.max(0L, Math.max(0, wallet) - Math.max(0, copper));
+    }
+
+    /**
+     * Replaces the amount of one denomination and keeps the others, e.g. setting silver to 5 in
+     * "3 gold 42 silver 7 copper" gives "3 gold 5 silver 7 copper" ({@code setCoinPlayer}).
+     */
+    public static long setCoin(long wallet, Coin coin, long newAmountCopper) {
+        long w = Math.max(0, wallet);
+        long current = fromCopper(w).get(coin) * coin.copperValue();
+        return add(w - current, newAmountCopper);
     }
 }

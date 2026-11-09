@@ -5,6 +5,8 @@ import net.minecraft.network.chat.MutableComponent;
 
 /** Human readable coin amounts for chat messages, e.g. "1 зол. 25 сер. 3 мед.". */
 public final class CoinText {
+    private static final Coin[] ORDER = {Coin.PLATINUM, Coin.GOLD, Coin.SILVER, Coin.COPPER};
+
     private CoinText() {
     }
 
@@ -12,8 +14,7 @@ public final class CoinText {
         CoinPurse coins = CoinMath.fromCopper(Math.max(0, copper));
         MutableComponent result = Component.empty();
         boolean any = false;
-        Coin[] order = {Coin.PLATINUM, Coin.GOLD, Coin.SILVER, Coin.COPPER};
-        for (Coin coin : order) {
+        for (Coin coin : ORDER) {
             long amount = coins.get(coin);
             if (amount > 0 || (!any && coin == Coin.COPPER)) {
                 if (any) {
