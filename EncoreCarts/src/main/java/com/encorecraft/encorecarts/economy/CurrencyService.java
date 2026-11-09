@@ -4,20 +4,24 @@ import java.util.OptionalLong;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * The only gateway between EncoreCarts and a wallet implementation. Everything else in the mod talks
- * to {@link Economy#service()} so that the command based backend can later be replaced by direct
- * EncoreCraft Java API calls without touching travel logic. Called on the server thread only.
+ * The only gateway between EncoreCarts and a wallet implementation. Travel logic talks to
+ * {@link Economy#service()} and never to a concrete backend. Called on the server thread only.
  */
 public interface CurrencyService {
     /** Short identifier for logs. */
     String id();
 
-    /** Total wallet value in copper, or empty if the wallet cannot be read right now. */
+    /** Total spendable value in copper, or empty if the wallet cannot be read right now. */
     OptionalLong balance(ServerPlayer player);
 
-    /** Removes {@code copper} worth of coins, breaking larger coins into change when needed. */
+    /** Removes {@code copper} from the wallet, atomically refusing when there is not enough. */
     PaymentResult withdraw(ServerPlayer player, long copper);
 
-    /** Adds {@code copper} worth of coins (used for refunds). */
+    /** Adds {@code copper} to the wallet (refunds). */
     boolean deposit(ServerPlayer player, long copper);
+
+    /** True when travel costs nothing because no currency is configured at all. */
+    default boolean isFree() {
+        return false;
+    }
 }
