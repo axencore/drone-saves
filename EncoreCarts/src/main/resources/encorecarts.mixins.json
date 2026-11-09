@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.encorecraft.encorecarts.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "ChunkMapAccessor",
+    "ServerPlayerMixin",
+    "TrackedEntityAccessor"
+  ],
+  "client": [
+    "client.CameraMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
