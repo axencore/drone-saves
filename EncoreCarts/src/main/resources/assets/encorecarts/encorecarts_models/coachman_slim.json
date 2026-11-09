@@ -1,0 +1,16 @@
+{
+  "model": "encorecarts:bbmodel/coachman_slim.bbmodel",
+  "textures": {
+    "0": "encorecarts:textures/entity/coachman/slim.png"
+  },
+  "scale": 0.9375,
+  "hidden_bones": ["DEBUG_OBJECTS", "ItemDebugVisibles", "ItemDebugVisibles2"],
+  "head_bone": "Head",
+  "animations": {
+    "idle": "idle",
+    "sit": "sit",
+    "greet": "hello",
+    "blink": "face-eyesClosed"
+  },
+  "seat_height": 0.29
+}
