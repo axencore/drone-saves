@@ -2,6 +2,7 @@ package com.encorecraft.encorecarts.travel;
 
 import com.encorecraft.encorecarts.config.CartsConfig;
 import com.encorecraft.encorecarts.economy.CoinText;
+import com.encorecraft.encorecarts.economy.CurrencyService;
 import com.encorecraft.encorecarts.economy.Economy;
 import com.encorecraft.encorecarts.economy.PaymentResult;
 import com.encorecraft.encorecarts.network.payload.TravelMenuPayload;
@@ -36,8 +37,9 @@ public final class TravelService {
         }
         StationManager.discover(player, origin);
 
-        long cost = CartsConfig.copperPer100Blocks();
-        OptionalLong balance = Economy.service().balance(player);
+        CurrencyService currency = Economy.service();
+        long cost = currency.isFree() ? 0 : CartsConfig.copperPer100Blocks();
+        OptionalLong balance = cost == 0 ? OptionalLong.empty() : currency.balance(player);
         List<TravelMenuPayload.Destination> destinations = new ArrayList<>();
         for (Station station : data.stations()) {
             if (station == origin || station.dimension() != origin.dimension() || !data.isOpenFor(player.getUUID(), station)) {
@@ -45,7 +47,7 @@ public final class TravelService {
             }
             double distance = origin.distanceTo(station);
             long price = PriceCalculator.price(distance, cost);
-            boolean affordable = balance.isPresent() && balance.getAsLong() >= price;
+            boolean affordable = price == 0 || (balance.isPresent() && balance.getAsLong() >= price);
             destinations.add(new TravelMenuPayload.Destination(station.id(), station.name(),
                     (int) Math.round(distance), price, affordable));
         }
@@ -80,8 +82,9 @@ public final class TravelService {
             openMenu(player, originId, error("message.encorecarts.travel.on_ground"));
             return;
         }
-        long price = PriceCalculator.price(origin.distanceTo(destination), CartsConfig.copperPer100Blocks());
-        PaymentResult result = Economy.service().withdraw(player, price);
+        CurrencyService currency = Economy.service();
+        long price = currency.isFree() ? 0 : PriceCalculator.price(origin.distanceTo(destination), CartsConfig.copperPer100Blocks());
+        PaymentResult result = currency.withdraw(player, price);
         switch (result) {
             case SUCCESS -> {
                 if (price > 0) {
