@@ -36,12 +36,13 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public final class CutsceneController {
     private enum Phase { IDLE, FADE_OUT, SCENE_IN, SCENE, SCENE_OUT, WAIT_ARRIVAL, FADE_IN }
 
-    private static final int FADE_OUT_TICKS = 16;
+    // ~5 s in total: 0.7 s fade out, 3.3 s cart shot (incl. fades), ≥0.1 s black, 0.8 s fade in.
+    private static final int FADE_OUT_TICKS = 14;
     private static final int SCENE_IN_TICKS = 8;
-    private static final int SCENE_TICKS = 50;
+    private static final int SCENE_TICKS = 46;
     private static final int SCENE_OUT_TICKS = 12;
-    private static final int FADE_IN_TICKS = 18;
-    private static final int MIN_WAIT_TICKS = 3;
+    private static final int FADE_IN_TICKS = 16;
+    private static final int MIN_WAIT_TICKS = 2;
     private static final int MAX_WAIT_TICKS = 140;
     private static final int SCENE_TOTAL_TICKS = SCENE_IN_TICKS + SCENE_TICKS + SCENE_OUT_TICKS;
     private static final ResourceLocation OVERLAY_LAYER = EncoreCarts.id("travel_cutscene");

@@ -131,8 +131,13 @@ public final class StationManager {
             Vec3 coachmanSpot = station.layout().coachmanSpot();
             if (entitiesLoaded(level, coachmanSpot)
                     && (station.coachmanId() == null || !(level.getEntity(station.coachmanId()) instanceof CoachmanEntity))) {
-                spawnCoachman(level, station, level.getRandom().nextBoolean());
-                data.setDirty();
+                // The coachman may stand up to 3 blocks off his nominal spot (terrain); that chunk must be loaded too,
+                // otherwise a still existing coachman there would be duplicated.
+                Vec3 actual = StationLayout.safeSpot(level, coachmanSpot);
+                if (entitiesLoaded(level, actual)) {
+                    spawnCoachman(level, station, level.getRandom().nextBoolean());
+                    data.setDirty();
+                }
             }
         }
     }

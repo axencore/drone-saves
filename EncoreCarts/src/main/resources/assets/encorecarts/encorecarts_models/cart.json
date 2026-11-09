@@ -10,7 +10,7 @@
   "wheel_radius": 0.5,
   "seats": {
     "driver": [-0.2, 1.25, 1.28],
-    "passenger": [0.25, 1.125, -0.34]
+    "passenger": [0.25, 1.0, -0.31]
   },
   "horse": {
     "enabled": true,

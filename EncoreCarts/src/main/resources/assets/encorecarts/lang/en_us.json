@@ -50,7 +50,7 @@
   "screen.encorecarts.placement.name_hint": "e.g. Northern Outpost",
   "screen.encorecarts.placement.global": "Open to all players",
   "screen.encorecarts.placement.global.tooltip": "On: everyone sees this point right away. Off: players must find the station and talk to its coachman.",
-  "screen.encorecarts.placement.help": "The cart faces where you look. The coachman stands at its front right, arriving players appear at its rear right.",
+  "screen.encorecarts.placement.help": "The horse will face where you are looking. The coachman stands at the front right, arriving players appear at the rear right.",
   "screen.encorecarts.placement.confirm": "Place",
   "screen.encorecarts.waiting": "Waiting for the server…",
   "screen.encorecarts.travel.title": "Coachman — \"%s\" station",

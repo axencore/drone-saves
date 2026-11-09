@@ -12,6 +12,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.navigation.ScreenDirection;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -78,9 +79,12 @@ public class TravelMenuScreen extends Screen {
             return;
         }
         list.replaceAll(data);
-        if (selectedId != null) {
-            list.children().stream().filter(e -> e.destination.id().equals(selectedId)).findFirst().ifPresent(list::setSelected);
+        DestinationEntry keep = selectedId == null ? null : list.children().stream()
+                .filter(e -> e.destination.id().equals(selectedId) && e.destination.affordable()).findFirst().orElse(null);
+        if (keep == null) {
+            selectedId = null;
         }
+        list.setSelected(keep);
     }
 
     private void updateButton() {
@@ -171,10 +175,19 @@ public class TravelMenuScreen extends Screen {
 
         @Override
         public void setSelected(@Nullable DestinationEntry entry) {
+            if (entry != null && !entry.destination.affordable()) {
+                return;
+            }
             super.setSelected(entry);
             if (entry != null) {
                 select(entry);
             }
+        }
+
+        @Override
+        @Nullable
+        protected DestinationEntry nextEntry(ScreenDirection direction) {
+            return nextEntry(direction, entry -> entry.destination.affordable());
         }
     }
 
@@ -205,6 +218,9 @@ public class TravelMenuScreen extends Screen {
 
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            if (!destination.affordable()) {
+                return true;
+            }
             long now = Util.getMillis();
             boolean doubleClick = list.getSelected() == this && now - lastClick < DOUBLE_CLICK_MS;
             lastClick = now;

@@ -149,9 +149,21 @@ public final class Molang {
             skipSpaces();
             int start = pos;
             if (pos < src.length() && (Character.isDigit(src.charAt(pos)) || src.charAt(pos) == '.')) {
-                while (pos < src.length() && (Character.isDigit(src.charAt(pos)) || src.charAt(pos) == '.'
-                        || src.charAt(pos) == 'e')) {
+                while (pos < src.length() && (Character.isDigit(src.charAt(pos)) || src.charAt(pos) == '.')) {
                     pos++;
+                }
+                // Exponent only when digits follow, so "2e" never swallows an identifier.
+                if (pos + 1 < src.length() && src.charAt(pos) == 'e') {
+                    int exp = pos + 1;
+                    if ((src.charAt(exp) == '-' || src.charAt(exp) == '+') && exp + 1 < src.length()) {
+                        exp++;
+                    }
+                    if (Character.isDigit(src.charAt(exp))) {
+                        pos = exp;
+                        while (pos < src.length() && Character.isDigit(src.charAt(pos))) {
+                            pos++;
+                        }
+                    }
                 }
                 return constant(Double.parseDouble(src.substring(start, pos)));
             }

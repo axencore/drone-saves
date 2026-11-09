@@ -14,7 +14,7 @@ public final class CartsClientConfig {
         ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         b.push("cutscene");
         FORCED_SHOT = b.comment("Camera shot for every trip: -1 = random (chosen by the server), 0..9 = always this shot.",
-                        "0 side, 1 inside the cart, 2 road behind, 3 head-on, 4 roadside pass, 5 crane, 6 orbit, 7 wheels, 8 coachman's shoulder, 9 departure")
+                        "0 side, 1 inside the cart, 2 road behind, 3 head-on, 4 roadside pass, 5 crane, 6 orbit, 7 wheels, 8 coachman portrait, 9 departure")
                 .defineInRange("forcedShot", -1, -1, 9);
         LETTERBOX = b.comment("Cinematic black bars during the cart shot.").define("letterbox", true);
         CUTSCENE_SOUNDS = b.comment("Hoof and wheel sounds during the cart shot.").define("sounds", true);

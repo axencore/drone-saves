@@ -50,7 +50,7 @@
   "screen.encorecarts.placement.name_hint": "Например: Северная застава",
   "screen.encorecarts.placement.global": "Доступна всем игрокам",
   "screen.encorecarts.placement.global.tooltip": "Включено: точка сразу видна всем. Выключено: игрок должен найти станцию и поговорить с извозчиком.",
-  "screen.encorecarts.placement.help": "Повозка встанет мордой лошади туда, куда вы смотрите. Извозчик стоит справа спереди, прибывающие появляются справа сзади.",
+  "screen.encorecarts.placement.help": "Лошадь будет смотреть туда же, куда смотрите вы. Извозчик встанет справа спереди, прибывающие игроки появляются справа сзади.",
   "screen.encorecarts.placement.confirm": "Установить",
   "screen.encorecarts.waiting": "Ожидание сервера…",
   "screen.encorecarts.travel.title": "Извозчик — станция «%s»",

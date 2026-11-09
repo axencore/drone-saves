@@ -30,7 +30,7 @@ import net.minecraft.world.phys.Vec3;
 final class CutsceneScene {
     private static final double SEATED_PLAYER_DROP = 0.62;
     private static final Vec3 DEFAULT_DRIVER_SEAT = new Vec3(0, 1.25, 1.2);
-    private static final Vec3 DEFAULT_PASSENGER_SEAT = new Vec3(0.25, 1.1, -0.4);
+    private static final Vec3 DEFAULT_PASSENGER_SEAT = new Vec3(0.25, 1.0, -0.31);
 
     private final ClientLevel level;
     private final CutscenePath path;
@@ -57,6 +57,10 @@ final class CutsceneScene {
         cart = new CartEntity(ModEntities.CART.get(), level);
         cart.setId(-1_000_001);
         cart.cutsceneActor = true;
+        if (level.getEntity(data.cartEntityId()) instanceof CartEntity real) {
+            // Same UUID → same horse coat as the station's own cart.
+            cart.setUUID(real.getUUID());
+        }
         horse = cartDef != null && cartDef.horse ? CartRenderer.horseFor(cart) : null;
         if (horse != null) {
             horse.setId(-1_000_002);
@@ -177,10 +181,8 @@ final class CutsceneScene {
     CameraPose camera(float partialTick, double progress) {
         double s = Mth.lerp(partialTick, distanceO, distance);
         Vec3 cartPos = path.position(s);
-        Vec3 driverHead = lerp(driver, partialTick).add(0, driverDrop + 0.95, 0);
-        Vec3 passengerHead = passenger == null ? cartPos.add(0, 2.0, 0) : lerp(passenger, partialTick).add(0, SEATED_PLAYER_DROP + 0.94, 0);
         CameraShots.Context context = new CameraShots.Context(level, path, cartPos, path.forward(), path.right(), s,
-                tick + partialTick, progress, driverHead, passengerHead);
+                tick + partialTick, progress);
         return shot.pose(context);
     }
 

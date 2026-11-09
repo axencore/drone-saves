@@ -16,7 +16,7 @@ final class CameraShots {
     private static final double ROLLING_START = 1.5;
 
     record Context(Level level, CutscenePath path, Vec3 cart, Vec3 forward, Vec3 right, double distance,
-                   double time, double progress, Vec3 driverHead, Vec3 passengerHead) {
+                   double time, double progress) {
         Vec3 at(double right, double up, double forward) {
             return new Vec3(cart.x + this.right.x * right + this.forward.x * forward, cart.y + up,
                     cart.z + this.right.z * right + this.forward.z * forward);
@@ -54,21 +54,21 @@ final class CameraShots {
             new Shot("inside") {
                 @Override
                 CameraPose pose(Context c) {
-                    Vec3 head = c.passengerHead();
-                    Vec3 cam = head.add(c.right().scale(0.35)).add(c.forward().scale(-0.85)).add(0, 0.3, 0);
-                    return look(c, cam, c.at(0, 1.25, 8), 0, 75, 0.25, false);
+                    // Under the canvas behind the traveller's left shoulder: player on the right, front opening ahead.
+                    return look(c, c.at(-0.32, 2.05, -1.1), c.at(-0.15, 1.45, 10), 0, 75, 0.25, false);
                 }
             },
             new Shot("road_behind") {
                 @Override
                 CameraPose pose(Context c) {
-                    return look(c, c.at(0.4, 2.6, -2.3), c.at(0, 0.3, -12), 0, 70, 0.2, true);
+                    // "Side mirror": outside the left board, looking back along the wagon at the receding road.
+                    return look(c, c.at(-1.55, 2.05, 0.9), c.at(-0.95, 0.85, -10), 0, 62, 0.25, true);
                 }
             },
             new Shot("head_on") {
                 @Override
                 CameraPose pose(Context c) {
-                    Vec3 cam = c.onPath(c.distance() + Mth.lerp(c.progress(), 12, 7), 1.1, 1.3);
+                    Vec3 cam = c.onPath(c.distance() + Mth.lerp(c.progress(), 10, 6), 1.1, 1.3);
                     return look(c, cam, c.at(0, 1.2, 1.8), 0, 55, 0.2, true);
                 }
             },
@@ -102,12 +102,11 @@ final class CameraShots {
                     return look(c, cam, c.at(0, 0.75, 0.5), 0, 78, 0.3, true);
                 }
             },
-            new Shot("coachman_shoulder") {
+            new Shot("coachman") {
                 @Override
                 CameraPose pose(Context c) {
-                    Vec3 head = c.driverHead();
-                    Vec3 cam = head.add(c.right().scale(0.45)).add(c.forward().scale(-0.75)).add(0, 0.35, 0);
-                    return look(c, cam, c.at(0, 1.0, 9), 0, 72, 0.3, false);
+                    // Portrait of the coachman at work: from beside the horse, looking back at him and the wagon.
+                    return look(c, c.at(1.25, 2.1, 3.0), c.at(-0.2, 1.75, 1.0), 0, 60, 0.25, true);
                 }
             },
             new Shot("departure") {
