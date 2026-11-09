@@ -7,11 +7,10 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 /**
- * Server → traveller only: play the travel cutscene at the departure station.
- * {@code cartEntityId}/{@code coachmanEntityId} are hidden on this client while the cutscene actors are shown (-1 if unloaded).
+ * Server → traveller only: start the travel cutscene. {@code route} is a {@code RouteKind} id and {@code seed}
+ * makes the client-side scene (decorations, camera cuts) reproducible.
  */
-public record StartCutscenePayload(int sessionId, int shot, int cartEntityId, int coachmanEntityId,
-                                   double x, double y, double z, float yaw, String destinationName)
+public record StartCutscenePayload(int sessionId, int route, long seed, String originName, String destinationName)
         implements CustomPacketPayload {
     public static final Type<StartCutscenePayload> TYPE = new Type<>(EncoreCarts.id("start_cutscene"));
     public static final StreamCodec<RegistryFriendlyByteBuf, StartCutscenePayload> CODEC =
@@ -19,19 +18,15 @@ public record StartCutscenePayload(int sessionId, int shot, int cartEntityId, in
 
     private void write(RegistryFriendlyByteBuf buf) {
         buf.writeVarInt(sessionId);
-        buf.writeVarInt(shot);
-        buf.writeVarInt(cartEntityId);
-        buf.writeVarInt(coachmanEntityId);
-        buf.writeDouble(x);
-        buf.writeDouble(y);
-        buf.writeDouble(z);
-        buf.writeFloat(yaw);
+        buf.writeVarInt(route);
+        buf.writeLong(seed);
+        buf.writeUtf(originName, StationNames.MAX_WIRE_LENGTH);
         buf.writeUtf(destinationName, StationNames.MAX_WIRE_LENGTH);
     }
 
     private static StartCutscenePayload read(RegistryFriendlyByteBuf buf) {
-        return new StartCutscenePayload(buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(),
-                buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readFloat(), buf.readUtf(StationNames.MAX_WIRE_LENGTH));
+        return new StartCutscenePayload(buf.readVarInt(), buf.readVarInt(), buf.readLong(),
+                buf.readUtf(StationNames.MAX_WIRE_LENGTH), buf.readUtf(StationNames.MAX_WIRE_LENGTH));
     }
 
     @Override

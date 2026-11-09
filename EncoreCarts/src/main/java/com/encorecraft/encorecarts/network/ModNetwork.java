@@ -2,7 +2,7 @@ package com.encorecraft.encorecarts.network;
 
 import com.encorecraft.encorecarts.EncoreCarts;
 import com.encorecraft.encorecarts.network.payload.ConfirmPlacementPayload;
-import com.encorecraft.encorecarts.network.payload.CutsceneReadyPayload;
+import com.encorecraft.encorecarts.network.payload.CutsceneProgressPayload;
 import com.encorecraft.encorecarts.network.payload.OpenPlacementScreenPayload;
 import com.encorecraft.encorecarts.network.payload.PlacementResultPayload;
 import com.encorecraft.encorecarts.network.payload.RequestTravelPayload;
@@ -23,7 +23,7 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 /** Payload registration. Serverbound handlers run on the server thread and re-validate everything. */
 public final class ModNetwork {
-    private static final String PROTOCOL = "1";
+    private static final String PROTOCOL = "2";
     @Nullable
     private static volatile ClientPacketHandler clientHandler;
 
@@ -41,8 +41,8 @@ public final class ModNetwork {
                 (payload, ctx) -> asServerPlayer(ctx, player -> PlacementRequests.confirm(player, payload)));
         registrar.playToServer(RequestTravelPayload.TYPE, RequestTravelPayload.CODEC,
                 (payload, ctx) -> asServerPlayer(ctx, player -> TravelService.requestTravel(player, payload.originId(), payload.destinationId())));
-        registrar.playToServer(CutsceneReadyPayload.TYPE, CutsceneReadyPayload.CODEC,
-                (payload, ctx) -> asServerPlayer(ctx, player -> TravelManager.onClientReady(player, payload.sessionId())));
+        registrar.playToServer(CutsceneProgressPayload.TYPE, CutsceneProgressPayload.CODEC,
+                (payload, ctx) -> asServerPlayer(ctx, player -> TravelManager.onProgress(player, payload.sessionId(), payload.stage())));
 
         registrar.playToClient(OpenPlacementScreenPayload.TYPE, OpenPlacementScreenPayload.CODEC,
                 (payload, ctx) -> client(handler -> handler.openPlacementScreen(payload)));

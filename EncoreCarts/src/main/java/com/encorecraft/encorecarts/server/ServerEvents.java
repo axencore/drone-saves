@@ -1,6 +1,7 @@
 package com.encorecraft.encorecarts.server;
 
 import com.encorecraft.encorecarts.command.CartsCommand;
+import com.encorecraft.encorecarts.economy.Economy;
 import com.encorecraft.encorecarts.economy.stub.TestWalletCommands;
 import com.encorecraft.encorecarts.station.PlacementRequests;
 import com.encorecraft.encorecarts.station.StationManager;
@@ -10,12 +11,14 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.ICancellableEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
@@ -33,6 +36,8 @@ public final class ServerEvents {
         bus.addListener(ServerEvents::onLogout);
         bus.addListener(ServerEvents::onChangedDimension);
         bus.addListener(ServerEvents::onIncomingDamage);
+        bus.addListener(ServerEvents::onChangeTarget);
+        bus.addListener(ServerEvents::onServerAboutToStart);
         bus.addListener(ServerEvents::onDeath);
         bus.addListener(ServerEvents::onEntityInteract);
         bus.addListener(ServerEvents::onEntityInteractSpecific);
@@ -80,6 +85,17 @@ public final class ServerEvents {
         if (event.getEntity() instanceof ServerPlayer player && TravelManager.isProtected(player)) {
             event.setCanceled(true);
         }
+    }
+
+    // Mobs at the destination ignore a traveller who is still watching the cutscene.
+    private static void onChangeTarget(LivingChangeTargetEvent event) {
+        if (event.getNewAboutToBeSetTarget() instanceof ServerPlayer player && TravelManager.isProtected(player)) {
+            event.setCanceled(true);
+        }
+    }
+
+    private static void onServerAboutToStart(ServerAboutToStartEvent event) {
+        Economy.select();
     }
 
     private static void onDeath(LivingDeathEvent event) {
